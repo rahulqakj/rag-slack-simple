@@ -1,0 +1,28 @@
+.env
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.swp
+.DS_Store
+.pytest_cache/
+.streamlit/
+uploads/
+*.sh
+
+# IDE and tooling
+.idea/
+.vscode/
+
+# Tambahan: file/folder yang tidak boleh di-push
+config/env/
+migrations/migration.sql
+docs/
+Sample Tech Doc/
+scripts/
+src/scripts/
+
+# Ignore all markdown documentation
+docs/
+**/*.md
+Sample Tech Doc/
