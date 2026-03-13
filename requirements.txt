@@ -1,0 +1,12 @@
+streamlit
+google-genai
+psycopg2-binary
+pgvector
+python-dotenv
+PyPDF2
+python-docx
+pandas
+streamlit-option-menu
+plotly
+streamlit-authenticator
+requests

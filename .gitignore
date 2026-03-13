@@ -15,7 +15,8 @@ uploads/
 .vscode/
 
 # Tambahan: file/folder yang tidak boleh di-push
-config/env/
+config/
+!config/env/.env.example
 migrations/migration.sql
 docs/
 Sample Tech Doc/
@@ -25,4 +26,6 @@ src/scripts/
 # Ignore all markdown documentation
 docs/
 **/*.md
+# Kecuali README.md di root
+!README.md
 Sample Tech Doc/

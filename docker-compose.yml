@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  # PostgreSQL with pgvector extension (PG17 for pg_textsearch support)
+  streamlit-db:
+    image: pgvector/pgvector:pg17
+    container_name: streamlit-db
+    environment:
+      POSTGRES_DB: ${DB_NAME:-qa_assistant}
+      POSTGRES_USER: ${DB_USER:-qa_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-qa_password}
+    ports:
+      - "5433:5432"
+    volumes:
+      - streamlit_db_data:/var/lib/postgresql/data
+      - ./migrations/migration.sql:/docker-entrypoint-initdb.d/migration.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U qa_user -d qa_assistant"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Streamlit QA Assistant
+  qa-assistant:
+    build: .
+    container_name: streamlit-app
+    ports:
+      - "8501:8501"
+    environment:
+      - DB_HOST=streamlit-db
+      - DB_PORT=5432
+      - DB_NAME=qa_assistant
+      - DB_USER=qa_user
+      - DB_PASSWORD=qa_password
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - APP_USERNAME=${APP_USERNAME:-admin}
+      - APP_PASSWORD=${APP_PASSWORD:-changeme}
+    depends_on:
+      streamlit-db:
+        condition: service_healthy
+    volumes:
+      - ./uploads:/app/uploads
+    restart: unless-stopped
+
+  slack-worker:
+    build: .
+    container_name: slack-ingest-worker
+    command: ["python", "-m", "src.workers.slack_ingest_worker"]
+    environment:
+      - DB_HOST=streamlit-db
+      - DB_PORT=5432
+      - DB_NAME=qa_assistant
+      - DB_USER=qa_user
+      - DB_PASSWORD=qa_password
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - WORKER_POLL_INTERVAL=5
+    depends_on:
+      streamlit-db:
+        condition: service_healthy
+    volumes:
+      - ./uploads:/app/uploads
+    restart: unless-stopped
+
+volumes:
+  streamlit_db_data:
